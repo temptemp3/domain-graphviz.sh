@@ -1,6 +1,7 @@
 *-store
 .*
 domain-lookup*
-domains
+domains*
+out.png
 generation
 reverse-lookup*

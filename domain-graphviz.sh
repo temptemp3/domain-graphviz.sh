@@ -1,7 +1,7 @@
 #!/bin/bash
 ## domain-graphviz
 ## - reads from file domains creates png graphviz
-## version 0.1.0 - add reverse ip lookup
+## version 0.1.1 - save dot
 ##################################################
 . ${SH2}/aliases/commands.sh
 . ${SH2}/cecho.sh
@@ -171,7 +171,7 @@ domain-graphviz-main() {
   }
 
   cecho green "generating dot ..."
-  generate dot | tee ${temp}-domains.dot &>/dev/null
+  generate dot | tee domains-dot | tee ${temp}-domains.dot &>/dev/null
   fdp -Tpng -o generation/${store[generation]}.png  ${temp}-domains.dot
   cecho green "done generating dot"
 
