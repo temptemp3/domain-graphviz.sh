@@ -1,7 +1,7 @@
 #!/bin/bash
 ## domain-graphviz
 ## - reads from file domains creates png graphviz
-## version 0.0.3 - relocate store initializer
+## version 0.1.0 - add reverse ip lookup
 ##################################################
 . ${SH2}/aliases/commands.sh
 . ${SH2}/cecho.sh
@@ -16,13 +16,19 @@ store-initialize() {
   store["generation"]=0
   store["domains_sha1sum"]=0
   store["domains"]=""
-  declare -p store
+  declare -p store &>/dev/null
 }
 store-persist() {
   store[domains_sha1sum]=${domains_sha1sum}
   store[generation]=$(( store[generation] + 1 ))
   store[domains]=${domains}
-  declare -p store | tee domain-graphviz-store
+  declare -p store | tee domain-graphviz-store &>/dev/null
+}
+store-set() {
+  true
+}
+store-get() {
+  true
 }
 store() {
   commands
@@ -63,13 +69,24 @@ generate() {
 }
 domains-renew() {
 
-  cecho green "performing batch nslookup ..."
+  cecho green "looking up host ips ..."
   {
     lookup-domain-names \
     | tee domain-lookup \
     | tee ${temp}-domains
   } &>/dev/null
-  cecho green "done performing batch nslookup"
+  cecho green "done looking up host ips"
+
+  cecho green "performing reverse ip lookup ..."
+  ips=$( cat domain-lookup | cut '-d ' '-f2' | sort -u )
+  for ip in ${ips}
+  do
+   host=$( dig -x ${ip} | grep -v -e '^;' | grep PTR | cut '-f3-4' | tr --delete '\t' | sed 's/^PTR//'  )
+   test ! "${host}" || {
+     echo "${host} ${ip}"
+   }
+  done | tee -a domain-lookup | tee -a ${temp}-domains
+  cecho green "done performing reverse ip lookup"
 
   test -f "domain-lookup-last" || touch ${_}
   icdiff domain-lookup{,-last} || exit

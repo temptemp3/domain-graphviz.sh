@@ -1,4 +1,6 @@
 *-store
+.*
 domain-lookup*
 domains
 generation
+reverse-lookup*
