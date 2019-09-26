@@ -1,7 +1,7 @@
 #!/bin/bash
 ## domain-graphviz
 ## - reads from file domains creates png graphviz
-## version 0.0.2 - conditionally load store
+## version 0.0.3 - relocate store initializer
 ##################################################
 . ${SH2}/aliases/commands.sh
 . ${SH2}/cecho.sh
@@ -120,15 +120,15 @@ domain-graphviz-main() {
 
   test -f "domains" || return
 
-
-  test -f domain-graphviz-store || touch ${_}
   test -d "generation" || mkdir -pv ${_}
 
   cecho green "initializing ..."
   initialize
   cecho green "done initializing"
 
-  test ! -f "domain-graphviz-store" || {
+  test ! -f "domain-graphviz-store" && {
+    touch ${_}
+  } || {
     . ${_}
     cecho green "loading store ..."
     sleep 1
