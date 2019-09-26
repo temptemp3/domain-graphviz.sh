@@ -1,7 +1,7 @@
 #!/bin/bash
 ## domain-graphviz
 ## - reads from file domains creates png graphviz
-## version 0.0.1 - initial
+## version 0.0.2 - conditionally load store
 ##################################################
 . ${SH2}/aliases/commands.sh
 . ${SH2}/cecho.sh
@@ -128,9 +128,12 @@ domain-graphviz-main() {
   initialize
   cecho green "done initializing"
 
-  cecho green "loading store ..."
-  . domain-graphviz-store
-  cecho green "done loading store"
+  test ! -f "domain-graphviz-store" || {
+    . ${_}
+    cecho green "loading store ..."
+    sleep 1
+    cecho green "done loading store"
+  }
 
   cecho green "initializing store ..."  
   declare -p store 2>/dev/null || { 
