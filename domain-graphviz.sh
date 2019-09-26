@@ -1,7 +1,7 @@
 #!/bin/bash
 ## domain-graphviz
 ## - reads from file domains creates png graphviz
-## version 0.1.1 - save dot
+## version 0.1.2 - test lookup-domain-names
 ##################################################
 . ${SH2}/aliases/commands.sh
 . ${SH2}/cecho.sh
@@ -180,6 +180,14 @@ domain-graphviz-main() {
   cecho green "done persiting store"
  
   temp-cleanup 
+}
+domain-graphviz-test-lookup-domain-names() {
+  domains=$( cat /dev/clipboard | xargs -i echo -n "{} " | tr --delete '\r' )
+  echo ${domains}
+  lookup-domain-names
+}
+domain-graphviz-test() {
+  commands
 }
 domain-graphviz() {
   commands
