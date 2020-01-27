@@ -7,3 +7,17 @@ Creates png graphviz image from file containing list of domain names
   + dig
 + graphviz (https://www.graphviz.org/download/)
   + fdp
+
+## quickstart
+
+```
+{
+  git clone https://github.com/temptemp3/domain-graphviz.sh.git
+  (
+    cd $( basename ${_} .git )
+    echo google.com >> domains
+    echo yahoo.com >> domains
+    echo youtube.com >> domains
+    bash domain-graphviz.sh
+}
+```
