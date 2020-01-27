@@ -1,3 +1,5 @@
+![quickstart generation 0](https://raw.githubusercontent.com/temptemp3/domain-graphviz.sh/master/assets/quickstart/0.png "quickstart generation 0")
+
 # domain-graphviz.sh
 Creates png graphviz image from file containing list of domain names
 
