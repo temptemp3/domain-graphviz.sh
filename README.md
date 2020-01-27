@@ -17,7 +17,7 @@ Creates png graphviz image from file containing list of domain names
     cd $( basename ${_} .git )
     echo google.com >> domains
     echo yahoo.com >> domains
-    echo youtube.com >> domains
+    echo wikipedia.org >> domains
     bash domain-graphviz.sh
   )
 }
