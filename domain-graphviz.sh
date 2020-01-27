@@ -1,45 +1,44 @@
 #!/bin/bash
 ## domain-graphviz
 ## - reads from file domains creates png graphviz
-## version 0.1.2 - test lookup-domain-names
+## version 0.1.3 - use store
 ##################################################
 . ${SH2}/aliases/commands.sh
 . ${SH2}/cecho.sh
 . ${SH2}/gt.sh
 . ${SH2}/build.sh
+. ${SH2}/store.sh
+{ # extend store 
+  store-initialize() {
+    store["generation"]=0
+    store["domains_sha1sum"]=0
+    store["domains"]=""
+    declare -p store &>/dev/null
+  }
+  store-persist() {
+    declare -p store | tee domain-graphviz-store &>/dev/null
+  }
+}
+{ # exit if missing dig
+  command dig &>/dev/null || {
+    cecho yellow "command ${_} not found"
+    cecho yellow "exiting ..."
+    false
+    exit
+  }
+}
 strip-comments() {
   sed -e 's/#.*//' -
 }
 car() { echo "${1}" ; }
 cdr() { echo "${@:2}" ; }
-store-initialize() {
-  store["generation"]=0
-  store["domains_sha1sum"]=0
-  store["domains"]=""
-  declare -p store &>/dev/null
-}
-store-persist() {
-  store[domains_sha1sum]=${domains_sha1sum}
-  store[generation]=$(( store[generation] + 1 ))
-  store[domains]=${domains}
-  declare -p store | tee domain-graphviz-store &>/dev/null
-}
-store-set() {
-  true
-}
-store-get() {
-  true
-}
-store() {
-  commands
-}
+
 generate-dot() {
   cat ${temp}-domains | gawk '
 BEGIN {
   print "digraph G {"
-  known_host["183.181.90.41"]="minoori (xserver)"
-  known_host["8.8.8.8"]="dns.google"
-  known_host["202.172.28.60"]="s59.coreserver.jp"
+  ## add known hosts here
+  #known_host["IP"]="NAME"
 }
 {
   if(!hash[$(2)]) {
@@ -143,21 +142,7 @@ domain-graphviz-main() {
   initialize
   cecho green "done initializing"
 
-  test ! -f "domain-graphviz-store" && {
-    touch ${_}
-  } || {
-    . ${_}
-    cecho green "loading store ..."
-    sleep 1
-    cecho green "done loading store"
-  }
-
-  cecho green "initializing store ..."  
-  declare -p store 2>/dev/null || { 
-    declare -A store
-    store initialize
-  }
-  cecho green "done initializing store"  
+  init-store
 
   cecho green "renewing domains ..."
   domains renew
@@ -175,6 +160,12 @@ domain-graphviz-main() {
   fdp -Tpng -o generation/${store[generation]}.png  ${temp}-domains.dot
   cecho green "done generating dot"
 
+  cecho green "updating store ..."
+  store[domains_sha1sum]=${domains_sha1sum}
+  store[generation]=$(( store[generation] + 1 ))
+  store[domains]=${domains}
+  cecho green "done updating store"
+
   cecho green "persisting store ..."
   store persist
   cecho green "done persiting store"
@@ -189,7 +180,31 @@ domain-graphviz-test-lookup-domain-names() {
 domain-graphviz-test() {
   commands
 }
+domain-graphviz-add-knownhost() { { local candidate_host_ip ; candidate_host_ip="${1}" ; local candidate_host_name ; candidate_host_name="${@:2}" ; }
+  local -i next_knownhost
+  next_knownhost=$( store get last_knownhost )
+  let next_knownhost+=1
+  cecho yellow "next_knownhost: ${next_knownhost}"
+  store set last_knownhost ${next_knownhost}
+  store set knownhost_${next_knownhost} "${candidate_host_ip} ${candidate_host_name}"
+  store persist
+}
+domain-graphviz-add() {
+  commands
+}
+domain-graphviz-list-knownhost() {
+  echo ${!store[@]} | grep -e 'knownhost_[0-9]\+' -o | while read -r key
+  do
+   store get ${key}
+  done
+}
+domain-graphviz-list() {
+  commands
+}
 domain-graphviz() {
+  {
+    init-store
+  } &>/dev/null
   commands
 }
 ##################################################
