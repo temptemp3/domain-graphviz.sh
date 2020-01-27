@@ -1,7 +1,7 @@
 #!/bin/bash
 ## domain-graphviz
 ## - reads from file domains creates png graphviz
-## version 0.1.3 - use store
+## version 0.2.0 - exit if missing domains
 ##################################################
 . ${SH2}/aliases/commands.sh
 . ${SH2}/cecho.sh
@@ -202,6 +202,20 @@ domain-graphviz-list() {
   commands
 }
 domain-graphviz() {
+  test -f "domains" || {
+    cecho yellow "missing ${_}"
+    cecho white "=domain="
+    {
+      cat << EOF
+domain.name.1
+domain.name.2
+domain.name.3
+...
+EOF
+    }
+    false
+    return
+  }
   {
     init-store
   } &>/dev/null
